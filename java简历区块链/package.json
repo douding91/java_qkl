@@ -1,0 +1,20 @@
+{
+  "name": "blockchain-resume-verification",
+  "version": "1.0.0",
+  "description": "Blockchain-based resume verification system",
+  "main": "truffle-config.js",
+  "scripts": {
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "migrate": "truffle migrate",
+    "migrate:reset": "truffle migrate --reset"
+  },
+  "dependencies": {
+    "@truffle/contract": "^4.5.0",
+    "web3": "^1.9.0"
+  },
+  "devDependencies": {
+    "@truffle/hdwallet-provider": "^2.0.0",
+    "truffle": "^5.5.0"
+  }
+} 

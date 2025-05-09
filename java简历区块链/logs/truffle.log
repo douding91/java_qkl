@@ -1,0 +1,41 @@
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+
+Starting migrations...
+======================
+> Network name:    'development'
+> Network id:      1337
+> Block gas limit: 6721975 (0x6691b7)
+
+
+1_deploy_contracts.js
+=====================
+
+   Replacing 'ResumeVerification'
+   ------------------------------
+   > transaction hash:    0x93329794b98303b3184cb7b49cd148262616fff2158521a4dde134789be80688
+- Blocks: 0            Seconds: 0
+   > Blocks: 0            Seconds: 0
+   > contract address:    0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab
+   > block number:        1
+   > block timestamp:     1746693535
+   > account:             0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
+   > balance:             99.96855056
+   > gas used:            1572472 (0x17fe78)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.03144944 ETH
+
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.03144944 ETH
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.03144944 ETH
+
+

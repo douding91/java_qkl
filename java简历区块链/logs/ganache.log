@@ -1,0 +1,52 @@
+Ganache CLI v6.12.2 (ganache-core: 2.13.2)
+
+Available Accounts
+==================
+(0) 0xCBb337f44DDD1684A8d0E18968b8bCC66F02B717 (100 ETH)
+(1) 0x0C678B0656d6062138EBD0d4F493f140308D8607 (100 ETH)
+(2) 0xCE6a6F022A154Ed6FCe683cAEA201b1769B9C72F (100 ETH)
+(3) 0x9c34e10AaF215215130F351cc18519d3f1b7756A (100 ETH)
+(4) 0x1aDb2Ee221cff56c44ffe2489D2B46163e604d84 (100 ETH)
+(5) 0x41f0119F891AA69c90eE948b62B2346cb08Cf55c (100 ETH)
+(6) 0x90482b762962A0628C69F9252D770E645a7Dd5cE (100 ETH)
+(7) 0xbA0deFb1C2d599a609E789fB8a65737BD32Ac24C (100 ETH)
+(8) 0x00d98Da0578370dab0975552298C3B35B31746f9 (100 ETH)
+(9) 0xfb748B426a34b4493a932E625DC2457d92CD7e51 (100 ETH)
+
+Private Keys
+==================
+(0) 0xee951f5c4f88125b6f406637549ed04416889f9207bef2476b3e11e83f73f965
+(1) 0x9c6f7fcf3843bda8bd145005a35685fc63b3b295dcf941d5d71cc6d02e9c6bb2
+(2) 0x9bac8a87a778e5496c54d7194d294b89b46286de4a5b1549afb594db9ed5c25d
+(3) 0x39161de958dda9c528591c81aa5d5366f230e59d8741cf56a76d2d642f99641a
+(4) 0xb02daf799489b2e40a7022e5c31fa16a365ae3f88434fd5045ce90d86bafadd4
+(5) 0x8494b31afd840f5b7f5fbbe8f26d75d0f2e6a822c491b202e088678b5f54b26c
+(6) 0x2db1e9ec17ac89eb6630d460322781b6b09b755ddf1791d19f56c990f31bfa40
+(7) 0x6aaba417fda5144a6cfb0fdad8210ef526cbe53dc5a3f6a7351408338bd8a64c
+(8) 0x172c8789bb98c3d386de35c1d039cc1ec32eef15307907092ea9ce08f70f7c71
+(9) 0xdfbbe6331092f0b0e8b7621eb7b8b51b5e528a6473a5cedb49fec014804ae8bd
+
+HD Wallet
+==================
+Mnemonic:      require human antique crash winter isolate evolve stage kitten search father thing
+Base HD Path:  m/44'/60'/0'/0/{account_index}
+
+Gas Price
+==================
+20000000000
+
+Gas Limit
+==================
+6721975
+
+Call Gas Limit
+==================
+9007199254740991
+
+Listening on 127.0.0.1:7545
+eth_getTransactionCount
+eth_getCode
+eth_getTransactionCount
+eth_sendRawTransaction
+eth_getTransactionCount
+eth_sendRawTransaction

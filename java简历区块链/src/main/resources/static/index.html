@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区块链简历验证系统</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .hero {
+            background-color: #f8f9fa;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">区块链简历验证系统</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/resume-manager.html">简历管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contract-test.html">合约测试</a>
+                    </li>
+                   
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero text-center">
+        <div class="container">
+            <h1 class="display-4">基于区块链的简历验证系统</h1>
+            <p class="lead">利用区块链技术确保简历信息的真实性和不可篡改性</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                <a href="/resume-manager.html" class="btn btn-primary btn-lg px-4 gap-3">简历管理</a>
+                <a href="/contract-test.html" class="btn btn-outline-secondary btn-lg px-4">测试合约</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="feature-icon">📝</div>
+                <h3>简历存储</h3>
+                <p>将简历信息安全地存储在区块链上，确保数据不可篡改</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-icon">✅</div>
+                <h3>简历验证</h3>
+                <p>由权威机构对简历信息进行验证，保证信息真实可靠</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-icon">🔍</div>
+                <h3>简历查询</h3>
+                <p>轻松查询简历信息及验证状态，提高招聘效率</p>
+            </div>
+        </div>
+
+        <hr class="my-5">
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>API 接口</h3>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>获取合约信息</span>
+                        <a href="/api/contract/info" class="badge bg-primary rounded-pill" target="_blank">GET</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>创建简历</span>
+                        <span class="badge bg-success rounded-pill">POST /api/resumes</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>获取简历列表</span>
+                        <span class="badge bg-primary rounded-pill">GET /api/resumes</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>验证简历</span>
+                        <span class="badge bg-warning rounded-pill">POST /api/resumes/{id}/verify</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h3>技术栈</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">后端</th>
+                                <td>Spring Boot 2.7.0</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">数据库</th>
+                                <td>H2 Database</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">区块链</th>
+                                <td>以太坊（Ganache）</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">智能合约</th>
+                                <td>Solidity 0.8.0</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">前端</th>
+                                <td>Bootstrap 5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-1">区块链简历验证系统 &copy; 2025</p>
+            <p class="text-muted">基于区块链技术的可信简历存储与验证平台</p>
+            <p>当前合约地址: <span id="contractAddress" class="font-monospace">加载中...</span></p>
+        </div>
+    </footer>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 获取并显示合约地址
+        fetch('/api/contract/info')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('contractAddress').textContent = data.address;
+            })
+            .catch(error => {
+                document.getElementById('contractAddress').textContent = '获取失败';
+                console.error('获取合约地址失败:', error);
+            });
+    </script>
+</body>
+</html> 

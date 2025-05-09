@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简历管理系统</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">区块链简历验证系统</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/resume-manager.html">简历管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contract-test.html">合约测试</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">简历管理系统</h1>
+        
+        <!-- 创建简历 -->
+        <div class="section bg-light" id="create-section">
+            <h3>创建简历</h3>
+            <form id="create-resume-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">姓名</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">邮箱</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="education" class="form-label">教育经历</label>
+                    <textarea class="form-control" id="education" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="workExperience" class="form-label">工作经历</label>
+                    <textarea class="form-control" id="workExperience" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="skills" class="form-label">技能</label>
+                    <textarea class="form-control" id="skills" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="blockchainHash" class="form-label">区块链哈希 (可选)</label>
+                    <input type="text" class="form-control" id="blockchainHash">
+                    <small class="text-muted">如不提供将自动生成</small>
+                </div>
+                <button type="submit" class="btn btn-primary">创建简历</button>
+            </form>
+        </div>
+
+        <!-- 查询简历 -->
+        <div class="section bg-light" id="list-section">
+            <h3>简历列表</h3>
+            <button id="refresh-resumes" class="btn btn-secondary mb-3">刷新列表</button>
+            <div id="resumes-container" class="row">
+                <!-- 简历列表将在这里显示 -->
+            </div>
+        </div>
+
+        <!-- 验证简历表单 (默认隐藏) -->
+        <div class="section bg-light" id="verify-section" style="display: none;">
+            <h3>验证简历</h3>
+            <form id="verify-resume-form">
+                <input type="hidden" id="verify-resume-id">
+                <div class="mb-3">
+                    <label for="verification-status" class="form-label">验证状态</label>
+                    <select class="form-control" id="verification-status" required>
+                        <option value="0">待验证 (PENDING)</option>
+                        <option value="1">已验证 (VERIFIED)</option>
+                        <option value="2">已拒绝 (REJECTED)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="verification-notes" class="form-label">验证备注</label>
+                    <textarea class="form-control" id="verification-notes" rows="2" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">提交验证</button>
+                <button type="button" class="btn btn-secondary" id="cancel-verify">取消</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal fade" id="resultModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title">操作结果</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- 结果内容将在这里显示 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API 端点
+        const API_BASE = '/api/resumes';
+        let resultModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化模态框
+            resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+            
+            // 加载简历列表
+            loadResumes();
+
+            // 创建简历表单提交
+            document.getElementById('create-resume-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createResume();
+            });
+
+            // 刷新简历列表按钮
+            document.getElementById('refresh-resumes').addEventListener('click', loadResumes);
+
+            // 验证简历表单提交
+            document.getElementById('verify-resume-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                verifyResume();
+            });
+
+            // 取消验证按钮
+            document.getElementById('cancel-verify').addEventListener('click', function() {
+                document.getElementById('verify-section').style.display = 'none';
+            });
+        });
+
+        // 加载简历列表
+        function loadResumes() {
+            fetch(API_BASE)
+                .then(response => response.json())
+                .then(data => {
+                    displayResumes(data);
+                })
+                .catch(error => {
+                    showModal('错误', '获取简历列表失败: ' + error.message);
+                });
+        }
+
+        // 显示简历列表
+        function displayResumes(resumes) {
+            const container = document.getElementById('resumes-container');
+            container.innerHTML = '';
+
+            if (resumes.length === 0) {
+                container.innerHTML = '<div class="col-12"><p class="text-center">暂无简历数据</p></div>';
+                return;
+            }
+
+            resumes.forEach(resume => {
+                const statusBadge = getStatusBadge(resume.status);
+                
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4 mb-3';
+                card.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>${resume.name}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="card-body">
+                            <p><strong>邮箱:</strong> ${resume.email}</p>
+                            <p><strong>教育:</strong> ${resume.education}</p>
+                            <p><strong>工作:</strong> ${resume.workExperience}</p>
+                            <p><strong>技能:</strong> ${resume.skills}</p>
+                            <p><strong>区块链哈希:</strong> ${resume.blockchainHash || '无'}</p>
+                            ${resume.verificationNotes ? `<p><strong>验证备注:</strong> ${resume.verificationNotes}</p>` : ''}
+                            <p class="text-muted"><small>创建时间: ${new Date(resume.createdAt).toLocaleString()}</small></p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-primary" onclick="showEditForm(${resume.id})">修改</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteResume(${resume.id})">删除</button>
+                                <button class="btn btn-sm btn-success" onclick="showVerifyForm(${resume.id})">验证</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 获取状态徽章
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'PENDING':
+                    return '<span class="badge bg-warning">待验证</span>';
+                case 'VERIFIED':
+                    return '<span class="badge bg-success">已验证</span>';
+                case 'REJECTED':
+                    return '<span class="badge bg-danger">已拒绝</span>';
+                default:
+                    return '<span class="badge bg-secondary">未知</span>';
+            }
+        }
+
+        // 创建简历
+        function createResume() {
+            const resumeData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                education: document.getElementById('education').value,
+                workExperience: document.getElementById('workExperience').value,
+                skills: document.getElementById('skills').value,
+                blockchainHash: document.getElementById('blockchainHash').value || generateHash()
+            };
+
+            fetch(API_BASE, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(resumeData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('创建简历失败，状态码: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showModal('成功', '简历创建成功!');
+                document.getElementById('create-resume-form').reset();
+                loadResumes(); // 刷新列表
+            })
+            .catch(error => {
+                showModal('错误', '创建简历失败: ' + error.message);
+            });
+        }
+
+        // 显示验证表单
+        function showVerifyForm(resumeId) {
+            document.getElementById('verify-resume-id').value = resumeId;
+            document.getElementById('verify-section').style.display = 'block';
+            document.getElementById('verify-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 验证简历
+        function verifyResume() {
+            const resumeId = document.getElementById('verify-resume-id').value;
+            const status = document.getElementById('verification-status').value;
+            const notes = document.getElementById('verification-notes').value;
+
+            // 构建URL参数
+            const params = new URLSearchParams();
+            params.append('status', status);
+            params.append('verificationNotes', notes);
+
+            fetch(`${API_BASE}/${resumeId}/verify?${params.toString()}`, {
+                method: 'POST'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('验证简历失败，状态码: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showModal('成功', '简历验证成功!');
+                document.getElementById('verify-resume-form').reset();
+                document.getElementById('verify-section').style.display = 'none';
+                loadResumes(); // 刷新列表
+            })
+            .catch(error => {
+                showModal('错误', '验证简历失败: ' + error.message);
+            });
+        }
+
+        // 生成随机哈希字符串
+        function generateHash() {
+            return 'hash_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // 显示模态框
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').textContent = message;
+            resultModal.show();
+        }
+
+        // 显示修改表单
+        function showEditForm(resumeId) {
+            fetch(`${API_BASE}/${resumeId}`)
+                .then(response => response.json())
+                .then(resume => {
+                    document.getElementById('name').value = resume.name;
+                    document.getElementById('email').value = resume.email;
+                    document.getElementById('education').value = resume.education;
+                    document.getElementById('workExperience').value = resume.workExperience;
+                    document.getElementById('skills').value = resume.skills;
+                    
+                    // 修改表单标题和按钮
+                    document.querySelector('#create-section h3').textContent = '修改简历';
+                    const submitBtn = document.querySelector('#create-resume-form button[type="submit"]');
+                    submitBtn.textContent = '保存修改';
+                    submitBtn.onclick = function(e) {
+                        e.preventDefault();
+                        updateResume(resumeId);
+                    };
+                    
+                    // 滚动到表单
+                    document.getElementById('create-section').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    showModal('错误', '获取简历信息失败: ' + error.message);
+                });
+        }
+
+        // 更新简历
+        function updateResume(resumeId) {
+            const resumeData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                education: document.getElementById('education').value,
+                workExperience: document.getElementById('workExperience').value,
+                skills: document.getElementById('skills').value
+            };
+
+            fetch(`${API_BASE}/${resumeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(resumeData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('更新简历失败，状态码: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showModal('成功', '简历更新成功!');
+                // 重置表单
+                document.getElementById('create-resume-form').reset();
+                document.querySelector('#create-section h3').textContent = '创建简历';
+                const submitBtn = document.querySelector('#create-resume-form button[type="submit"]');
+                submitBtn.textContent = '创建简历';
+                submitBtn.onclick = null;
+                loadResumes(); // 刷新列表
+            })
+            .catch(error => {
+                showModal('错误', '更新简历失败: ' + error.message);
+            });
+        }
+
+        // 删除简历
+        function deleteResume(resumeId) {
+            if (!confirm('确定要删除这份简历吗？此操作不可恢复。')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/${resumeId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('删除简历失败，状态码: ' + response.status);
+                }
+                showModal('成功', '简历删除成功!');
+                loadResumes(); // 刷新列表
+            })
+            .catch(error => {
+                showModal('错误', '删除简历失败: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合约 ABI 测试</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>合约 ABI 测试 <small class="text-muted">(端口: 8088)</small></h1>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        合约信息
+                    </div>
+                    <div class="card-body">
+                        <button id="getContractInfo" class="btn btn-primary mb-3">获取合约信息</button>
+                        <button id="autoRetry" class="btn btn-warning mb-3 ms-2">自动重试</button>
+                        <div class="mb-3">
+                            <label class="form-label">合约地址:</label>
+                            <div id="contractAddress" class="border p-2 bg-light"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">合约 ABI (原始):</label>
+                            <pre id="contractAbiRaw" class="border p-2 bg-light" style="max-height: 200px; overflow: auto;"></pre>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">合约 ABI (解析后):</label>
+                            <pre id="contractAbiParsed" class="border p-2 bg-light" style="max-height: 200px; overflow: auto;"></pre>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">合约方法:</label>
+                            <ul id="contractMethods" class="list-group"></ul>
+                        </div>
+                        <div id="statusLog" class="alert alert-secondary mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 状态日志记录
+        function logStatus(message, type = 'info') {
+            const statusLog = document.getElementById('statusLog');
+            const time = new Date().toLocaleTimeString();
+            const classMap = {
+                info: 'text-info',
+                success: 'text-success',
+                warning: 'text-warning',
+                error: 'text-danger'
+            };
+            const className = classMap[type] || classMap.info;
+            
+            statusLog.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+            statusLog.scrollTop = statusLog.scrollHeight;
+        }
+        
+        let retryCount = 0;
+        let retryInterval = null;
+        const MAX_RETRIES = 5;
+        
+        async function fetchContractInfo() {
+            try {
+                // 清空之前的内容
+                document.getElementById('contractAddress').textContent = '加载中...';
+                document.getElementById('contractAbiRaw').textContent = '加载中...';
+                document.getElementById('contractAbiParsed').textContent = '加载中...';
+                document.getElementById('contractMethods').innerHTML = '';
+
+                logStatus('获取合约信息...');
+                
+                // 获取合约信息
+                const response = await fetch('/api/contract/info');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`获取合约信息失败: ${errorData.error || response.statusText}`);
+                }
+                
+                logStatus('成功获取合约信息', 'success');
+                const contractInfo = await response.json();
+                
+                // 显示合约地址
+                document.getElementById('contractAddress').textContent = contractInfo.address;
+                
+                // 显示原始 ABI
+                const rawAbi = typeof contractInfo.abi === 'string' 
+                    ? contractInfo.abi 
+                    : JSON.stringify(contractInfo.abi);
+                document.getElementById('contractAbiRaw').textContent = rawAbi;
+                logStatus(`ABI 原始长度: ${rawAbi.length} 字符`);
+                
+                // 尝试解析 ABI 并显示
+                try {
+                    const parsedAbi = typeof contractInfo.abi === 'string' 
+                        ? JSON.parse(rawAbi) 
+                        : contractInfo.abi;
+                    
+                    document.getElementById('contractAbiParsed').textContent = JSON.stringify(parsedAbi, null, 2);
+                    logStatus(`成功解析 ABI, 包含 ${parsedAbi.length} 个定义`, 'success');
+                    
+                    // 显示合约方法
+                    const methodsList = document.getElementById('contractMethods');
+                    methodsList.innerHTML = '';
+                    
+                    const methods = parsedAbi.filter(item => item.type === 'function');
+                    methods.forEach(method => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        
+                        // 格式化方法签名
+                        const inputs = method.inputs.map(input => `${input.type} ${input.name}`).join(', ');
+                        const outputs = method.outputs ? method.outputs.map(output => output.type).join(', ') : 'void';
+                        
+                        li.innerHTML = `<strong>${method.name}</strong>(${inputs}) → ${outputs}`;
+                        methodsList.appendChild(li);
+                    });
+                    
+                    logStatus(`显示了 ${methods.length} 个合约方法`, 'success');
+                    
+                    // 停止自动重试
+                    if (retryInterval) {
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        retryCount = 0;
+                        logStatus('自动重试已停止 - 成功获取合约信息', 'success');
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    document.getElementById('contractAbiParsed').textContent = `解析错误: ${error.message}`;
+                    logStatus(`ABI 解析失败: ${error.message}`, 'error');
+                    
+                    // 如果在自动重试中，不显示弹窗
+                    if (!retryInterval) {
+                        alert(`ABI 解析失败: ${error.message}`);
+                    }
+                    return false;
+                }
+                
+            } catch (error) {
+                logStatus(error.message, 'error');
+                document.getElementById('contractAddress').textContent = '获取失败';
+                document.getElementById('contractAbiRaw').textContent = '获取失败';
+                document.getElementById('contractAbiParsed').textContent = '获取失败';
+                
+                // 如果在自动重试中，不显示弹窗
+                if (!retryInterval) {
+                    alert(error.message);
+                }
+                return false;
+            }
+        }
+        
+        // 自动重试功能
+        function startAutoRetry() {
+            if (retryInterval) {
+                clearInterval(retryInterval);
+                logStatus('重置自动重试', 'warning');
+            }
+            
+            retryCount = 0;
+            logStatus('开始自动重试...', 'info');
+            
+            // 立即尝试一次
+            fetchContractInfo().then(success => {
+                if (success) return;
+                
+                // 如果失败，设置定时器
+                retryInterval = setInterval(async () => {
+                    retryCount++;
+                    logStatus(`自动重试 (${retryCount}/${MAX_RETRIES})...`, 'warning');
+                    
+                    const success = await fetchContractInfo();
+                    
+                    if (success || retryCount >= MAX_RETRIES) {
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                        
+                        if (!success) {
+                            logStatus(`达到最大重试次数 (${MAX_RETRIES})，自动重试已停止`, 'error');
+                        }
+                    }
+                }, 3000); // 每3秒重试一次
+            });
+        }
+        
+        document.getElementById('getContractInfo').addEventListener('click', fetchContractInfo);
+        document.getElementById('autoRetry').addEventListener('click', startAutoRetry);
+        
+        // 页面加载时自动获取一次
+        document.addEventListener('DOMContentLoaded', fetchContractInfo);
+    </script>
+</body>
+</html> 

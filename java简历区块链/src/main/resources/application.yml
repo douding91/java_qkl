@@ -1,0 +1,48 @@
+server:
+  port: 8088
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:resumedb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  thymeleaf:
+    cache: false
+  security:
+    user:
+      name: admin
+      password: admin
+
+blockchain:
+  network:
+    url: http://localhost:7545
+    chainId: 1337
+    gasPrice: 20000000000
+    gasLimit: 6721975
+  contract:
+    address: ${CONTRACT_ADDRESS:0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab}
+    owner:
+      private-key: ${OWNER_PRIVATE_KEY:0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d}
+
+logging:
+  level:
+    root: INFO
+    com.resume.blockchain: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.web3j: DEBUG
+    org.hibernate: ERROR
+  file:
+    name: logs/blockchain-resume.log
+    max-size: 10MB
+    max-history: 30 
